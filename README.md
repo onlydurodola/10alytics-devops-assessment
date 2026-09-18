@@ -173,6 +173,58 @@ Default demo users are seeded on first start:
 
 ## Provision AWS Infrastructure (Terraform)
 
+This project uses Terraform with an **S3 backend** to store state remotely. This protects state files and supports collaboration by preventing concurrent changes and avoiding local state loss.
+
+### Bootstrap the Terraform backend (one-time)
+
+Before the first `terraform apply`, create the S3 bucket that will hold the Terraform state. The bucket name must be globally unique, so include your AWS account ID.
+
+```bash
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+export BUCKET_NAME="10alytics-devops-tfstate-${AWS_ACCOUNT_ID}"
+
+aws s3api create-bucket \
+  --bucket "$BUCKET_NAME" \
+  --region eu-north-1 \
+  --create-bucket-configuration LocationConstraint=eu-north-1
+
+aws s3api put-bucket-versioning \
+  --bucket "$BUCKET_NAME" \
+  --versioning-configuration Status=Enabled \
+  --region eu-north-1
+
+aws s3api put-bucket-encryption \
+  --bucket "$BUCKET_NAME" \
+  --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}' \
+  --region eu-north-1
+
+aws s3api put-public-access-block \
+  --bucket "$BUCKET_NAME" \
+  --public-access-block-configuration 'BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true' \
+  --region eu-north-1
+```
+
+The backend is already configured in `terraform/main.tf` using Terraform's native S3 lockfile:
+
+```hcl
+backend "s3" {
+  bucket       = "10alytics-devops-tfstate-<YOUR_ACCOUNT_ID>"
+  key          = "terraform.tfstate"
+  region       = "eu-north-1"
+  encrypt      = true
+  use_lockfile = true
+}
+```
+
+Replace the bucket name with the one you just created, then run:
+
+```bash
+cd terraform
+terraform init
+```
+
+### Provision infrastructure
+
 1. Generate an SSH key pair:
 
 ```bash
@@ -187,7 +239,6 @@ This creates:
 2. Configure Terraform variables:
 
 ```bash
-cd terraform
 cp terraform.tfvars.example terraform.tfvars
 ```
 
@@ -200,10 +251,9 @@ instance_type  = "t3.micro"
 ssh_public_key = "ssh-ed25519 AAAAC3... devops@10alytics.com"
 ```
 
-3. Provision:
+3. Apply:
 
 ```bash
-terraform init
 terraform plan
 terraform apply -auto-approve
 ```
