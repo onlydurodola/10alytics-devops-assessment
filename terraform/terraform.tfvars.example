@@ -1,0 +1,4 @@
+aws_region     = "us-east-1"
+project_name   = "10alytics-assessment"
+instance_type  = "t3.micro"
+ssh_public_key = "ssh-ed25519 AAAAC3... your-email@example.com"

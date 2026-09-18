@@ -1,0 +1,3 @@
+---
+app_dir: /opt/10alytics-app
+log_dir: /var/log/10alytics-app

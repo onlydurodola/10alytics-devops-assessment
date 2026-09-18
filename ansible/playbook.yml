@@ -1,0 +1,8 @@
+---
+- name: Configure EC2 host for the Flask application
+  hosts: web
+  become: yes
+  roles:
+    - common
+    - docker
+    - app

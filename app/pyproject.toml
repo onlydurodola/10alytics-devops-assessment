@@ -1,0 +1,4 @@
+[tool.ruff.lint]
+# Alembic env.py must call fileConfig before importing app models,
+# so E402 (module import not at top level) is ignored there.
+ignore = ["E402"]
