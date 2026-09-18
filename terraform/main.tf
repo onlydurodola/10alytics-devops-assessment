@@ -6,6 +6,14 @@ terraform {
     }
   }
 
+  backend "s3" {
+    bucket       = "10alytics-devops-tfstate-282301322045"
+    key          = "terraform.tfstate"
+    region       = "eu-north-1"
+    encrypt      = true
+    use_lockfile = true
+  }
+
   required_version = ">= 1.10.0"
 }
 
