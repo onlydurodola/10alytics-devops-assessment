@@ -1,15 +1,14 @@
 name: CD
 
 on:
-  # push:
-  #   branches: [main]
-    # paths:
-    #   - 'app/**'
-    #   - 'frontend/**'
-    #   - 'deploy/**'
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'frontend/**'
+      - 'deploy/**'
+  workflow_dispatch:
 
-    workflow_dispatch:
-      
 env:
   BACKEND_IMAGE: ghcr.io/onlydurodola/taskapp-backend
   FRONTEND_IMAGE: ghcr.io/onlydurodola/taskapp-frontend
